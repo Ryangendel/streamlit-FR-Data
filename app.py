@@ -341,6 +341,32 @@ page = st.sidebar.radio("Choose a page:", ["Fortitude Ranch Overview", "Collapse
 if page == "Fortitude Ranch Overview":
     st.title("🌐 Traffic Overview")
 
+    # Convert to datetime
+    df3['first_view'] = pd.to_datetime(df3['first_view'])
+
+    # Filter for the last 14 days
+    last_14_days = pd.Timestamp.now() - pd.Timedelta(days=14)
+    df_recent = df3[df3['first_view'] >= last_14_days].copy()
+
+    # Extract date only
+    df_recent['date'] = df_recent['first_view'].dt.date
+
+    # Group by date and sum hits
+    daily_visits = df_recent.groupby('date')['hits'].sum().reset_index()
+
+    # Plot
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(daily_visits['date'], daily_visits['hits'], marker='o')
+    ax.set_title('Total Page Views (Last 14 Days (DATA WAS EXTRACTED MIDDAY))', fontsize=14)
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Total Page Views')
+    ax.grid(True)
+
+    # Show in Streamlit
+    st.pyplot(fig)
+
+
+
     # st.subheader("🔢 URI Visit Counts (Cleaned)")
     uri_counts = df1['uri'].value_counts().reset_index()
     uri_counts.columns = ['uri', 'visit_count']
